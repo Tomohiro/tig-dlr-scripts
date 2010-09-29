@@ -290,11 +290,10 @@ class QuoteRetweetCommand(TypableMapCommand): # {{{2
     ''' コメント付き非公式 RT を行います '''
     def __init__(self, manager, processor, msg, status, args):
         TypableMapCommand.__init__(self, manager, processor, msg, status, args)
-        self.include_user = False
 
     def process(self):
         text = '%s ' % self.args if self.args else ''
-        user = ' @%s' % self.status.User.ScreenName if self.include_user else ''
+        user = ' @%s' % self.status.User.ScreenName
 
         update_text = '%sRT%s: %s' % (text, user, self.status.Text)
         self.notice(update_text)
@@ -327,7 +326,7 @@ manager.register('res', 'Show reply to status command', ShowReplyToStatusCommand
 manager.register('rres', 'Show recursive reply to status command', ShowRecursiveReplyToStatusCommand)
 manager.register('rt', 'retweet command', RetweetCommand)
 manager.register('mrt', 'Unofficial retweet command', UnofficialRetweetCommand)
-manager.register('qt', 'quote retweet command', QuoteRetweetCommand)
+manager.register('qt', 'Quote retweet command', QuoteRetweetCommand)
 manager.register('block', 'Block command', BlockCommand)
 manager.register('spam', 'Report spam command', ReportSpamCommand)
 
