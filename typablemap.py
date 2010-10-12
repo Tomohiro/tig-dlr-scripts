@@ -295,7 +295,7 @@ class QuoteRetweetCommand(TypableMapCommand): # {{{2
         text = '%s ' % self.args if self.args else ''
         user = ' @%s' % self.status.User.ScreenName
 
-        update_text = '%sRT%s: %s' % (text, user, self.status.Text)
+        update_text = '%sQT%s: %s' % (text, user, self.status.Text)
         self.notice(update_text)
         self.update_deferred(update_text)
 
