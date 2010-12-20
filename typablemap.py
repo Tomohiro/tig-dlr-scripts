@@ -51,7 +51,7 @@ class TypableMapCommand(object): # {{{2
             raise DeserializeFailedError
         else:
             return type.Serializer.Deserialize(StringReader(xml))
-    
+
     @classmethod
     def get_status(cls, id):
         ''' ID からステータスを取得します '''
@@ -81,7 +81,7 @@ class TypableMapCommand(object): # {{{2
             CurrentSession.UpdateStatusWithReceiverDeferred(receiver, text)
         else:
             CurrentSession.UpdateStatusWithReceiverDeferred(receiver, text, in_reply_to_id)
-    
+
     def notice(self, text, receiver=None, nick=None):
         ''' 指定したチャンネルに NOTICE を送信します '''
         if receiver is None:
@@ -147,7 +147,7 @@ class TypableMapCommandManager(object): # {{{2
 
         self.commands.append(command)
         self.typablemap_commands.AddCommand(command, desc, inner)
-    
+
 # commands {{{1
 class ShowUserInfoCommand(TypableMapCommand): # {{{2
     ''' ユーザ情報を表示します '''
@@ -159,7 +159,7 @@ class ShowUserInfoCommand(TypableMapCommand): # {{{2
                 value = unicode(getattr(user, key))
                 if value:
                     self.notice('%s: %s' % (key, value))
-    
+
     def error(self, e):
         self.notice('エラー: ユーザ情報の取得に失敗しました。')
         self.notice(e.Message)
@@ -203,7 +203,7 @@ class ShowReplyToStatusCommand(TypableMapCommand): # {{{2
     def __init__(self, manager, processor, msg, status, args):
         TypableMapCommand.__init__(self, manager, processor, msg, status, args)
         self.recursive = False
-    
+
     @classmethod
     def has_reply_to_status_id(cls, status):
         if status is None:
@@ -227,6 +227,7 @@ class ShowReplyToStatusCommand(TypableMapCommand): # {{{2
             finally:
                 # 逆順で流す
                 for status, text in reversed(statuses):
+                    text = '%s: %s' % (status.CreatedAt.ToString('HH:mm'), text)
                     self.notice(text, nick=status.User.ScreenName)
 
     def error(self, e):
@@ -254,6 +255,7 @@ class ShowUserTimelineCommand(TypableMapCommand): # {{{2
 
         for status in reversed(list(statuses.Status)):
             text = self.apply_typablemap(status)
+            text = '%s: %s' % (status.CreatedAt.ToString('HH:mm'), text)
             self.notice(text, nick=status.User.ScreenName)
 
     def error(self, e):
@@ -329,4 +331,3 @@ manager.register('mrt', 'Unofficial retweet command', UnofficialRetweetCommand)
 manager.register('qt', 'Quote retweet command', QuoteRetweetCommand)
 manager.register('block', 'Block command', BlockCommand)
 manager.register('spam', 'Report spam command', ReportSpamCommand)
-
