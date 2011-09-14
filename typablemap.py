@@ -147,7 +147,7 @@ class TypableMapCommandManager(object): # {{{2
 
         self.commands.append(command)
         self.typablemap_commands.AddCommand(command, desc, inner)
-
+    
 # commands {{{1
 class ShowUserInfoCommand(TypableMapCommand): # {{{2
     ''' ユーザ情報を表示します '''
@@ -159,7 +159,7 @@ class ShowUserInfoCommand(TypableMapCommand): # {{{2
                 value = unicode(getattr(user, key))
                 if value:
                     self.notice('%s: %s' % (key, value))
-
+    
     def error(self, e):
         self.notice('エラー: ユーザ情報の取得に失敗しました。')
         self.notice(e.Message)
@@ -203,7 +203,7 @@ class ShowReplyToStatusCommand(TypableMapCommand): # {{{2
     def __init__(self, manager, processor, msg, status, args):
         TypableMapCommand.__init__(self, manager, processor, msg, status, args)
         self.recursive = False
-
+    
     @classmethod
     def has_reply_to_status_id(cls, status):
         if status is None:
@@ -227,7 +227,6 @@ class ShowReplyToStatusCommand(TypableMapCommand): # {{{2
             finally:
                 # 逆順で流す
                 for status, text in reversed(statuses):
-                    text = '%s: %s' % (status.CreatedAt.ToString('HH:mm'), text)
                     self.notice(text, nick=status.User.ScreenName)
 
     def error(self, e):
@@ -255,7 +254,6 @@ class ShowUserTimelineCommand(TypableMapCommand): # {{{2
 
         for status in reversed(list(statuses.Status)):
             text = self.apply_typablemap(status)
-            text = '%s: %s' % (status.CreatedAt.ToString('HH:mm'), text)
             self.notice(text, nick=status.User.ScreenName)
 
     def error(self, e):
@@ -301,6 +299,21 @@ class QuoteRetweetCommand(TypableMapCommand): # {{{2
         self.notice(update_text)
         self.update_deferred(update_text)
 
+class RetweetAndFavoriteCommand(TypableMapCommand): # {{{2
+    ''' 公式 RT と Favorite を行ないます '''
+    def process(self):
+        status = self.deserialize(Status, self.post('/statuses/retweet/%d.xml' % self.status.Id))
+        retweeted = status.RetweetedStatus
+        self.notice('ユーザ %s のステータス "%s" を RT しました。' % (retweeted.User.ScreenName, retweeted.Text))
+
+        status = self.deserialize(Status, self.post('/favorites/create/%d.xml' % self.status.Id))
+        self.notice('ユーザ %s のステータス "%s" をFovoritesに追加しました。' % (self.status.User.ScreenName, self.status.Text))
+
+    def error(self, e):
+        self.notice('エラー: RT, Favoritesへの追加に失敗しました。')
+        self.notice(e.Message)
+
+
 class BlockCommand(TypableMapCommand): # {{{2
     def process(self):
         user = self.deserialize(User, self.post('/blocks/create.xml', user_id=self.status.User.Id))
@@ -326,8 +339,9 @@ manager.register('tl', 'Show user timeline command', ShowUserTimelineCommand)
 manager.register('cv', 'Show conversation command', ShowConversationCommand)
 manager.register('res', 'Show reply to status command', ShowReplyToStatusCommand)
 manager.register('rres', 'Show recursive reply to status command', ShowRecursiveReplyToStatusCommand)
-manager.register('rt', 'retweet command', RetweetCommand)
+manager.register('rt', 'Retweet command', RetweetCommand)
 manager.register('mrt', 'Unofficial retweet command', UnofficialRetweetCommand)
 manager.register('qt', 'Quote retweet command', QuoteRetweetCommand)
 manager.register('block', 'Block command', BlockCommand)
 manager.register('spam', 'Report spam command', ReportSpamCommand)
+manager.register('rf', 'Retweet and favorite command', RetweetAndFavoriteCommand)
