@@ -307,7 +307,7 @@ class RetweetAndFavoriteCommand(TypableMapCommand): # {{{2
         self.notice('ユーザ %s のステータス "%s" を RT しました。' % (retweeted.User.ScreenName, retweeted.Text))
 
         status = self.deserialize(Status, self.post('/favorites/create/%d.xml' % self.status.Id))
-        self.notice('ユーザ %s のステータス "%s" をFovoritesに追加しました。' % (self.status.User.ScreenName, self.status.Text))
+        self.notice('ユーザ %s のステータス "%s" をFavoritesに追加しました。' % (self.status.User.ScreenName, self.status.Text))
 
     def error(self, e):
         self.notice('エラー: RT, Favoritesへの追加に失敗しました。')
